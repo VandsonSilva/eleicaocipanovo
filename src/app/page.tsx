@@ -1,69 +1,125 @@
-import Image from "next/image";
 
-export default function Home() {
+"use client";
+
+import { FormEvent, useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase-browser";
+
+export default function LoginPage() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+  const [erro, setErro] = useState("");
+  const [carregando, setCarregando] = useState(false);
+
+  async function entrar(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setErro("");
+    setCarregando(true);
+
+    try {
+      const supabase = createClient();
+
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: senha,
+      });
+
+      if (error) {
+        setErro("E-mail ou senha inválidos. Confira os dados e tente novamente.");
+        return;
+      }
+
+      router.replace("/dashboard");
+      router.refresh();
+    } catch (error) {
+      console.error("Erro no login:", error);
+      setErro("Não foi possível conectar ao sistema. Tente novamente.");
+    } finally {
+      setCarregando(false);
+    }
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
+    <main className="flex min-h-screen items-center justify-center bg-gray-100 px-4 py-8">
+      <section className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl">
+        <div className="mb-8 text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-green-700 text-3xl font-bold text-white">
+            C
+          </div>
+
+          <h1 className="text-2xl font-bold text-gray-900">
+            Sistema CIPA
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+
+          <p className="mt-2 text-sm text-gray-500">
+            Entre com sua conta autorizada para administrar o sistema.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
+
+        <form onSubmit={entrar} className="space-y-5">
+          <div>
+            <label
+              htmlFor="email"
+              className="mb-2 block text-sm font-medium text-gray-700"
+            >
+              E-mail
+            </label>
+
+            <input
+              id="email"
+              type="email"
+              autoComplete="username"
+              required
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="seuemail@empresa.com"
+              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 outline-none focus:border-green-600 focus:ring-2 focus:ring-green-100"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+          </div>
+
+          <div>
+            <label
+              htmlFor="senha"
+              className="mb-2 block text-sm font-medium text-gray-700"
+            >
+              Senha
+            </label>
+
+            <input
+              id="senha"
+              type="password"
+              autoComplete="current-password"
+              required
+              value={senha}
+              onChange={(event) => setSenha(event.target.value)}
+              placeholder="Digite sua senha"
+              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 outline-none focus:border-green-600 focus:ring-2 focus:ring-green-100"
+            />
+          </div>
+
+          {erro && (
+            <p
+              role="alert"
+              className="rounded-lg bg-red-50 p-3 text-sm text-red-700"
+            >
+              {erro}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={carregando}
+            className="w-full rounded-lg bg-green-700 px-4 py-3 font-semibold text-white transition hover:bg-green-800 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+            {carregando ? "Entrando..." : "Entrar no sistema"}
+          </button>
+        </form>
+
+        <p className="mt-6 text-center text-xs text-gray-400">
+          Sistema de gerenciamento da eleição da CIPA
+        </p>
+      </section>
+    </main>
   );
 }
