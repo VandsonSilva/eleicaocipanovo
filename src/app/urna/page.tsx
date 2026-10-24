@@ -81,74 +81,34 @@ export default function UrnaPage() {
     let consultando = false;
 
     async function carregarEleicao(eleicaoId: string) {
-      const { data: eleicao, error: erroEleicao } = await supabase
-        .from("eleicoes")
-        .select("nome")
-        .eq("id", eleicaoId)
-        .single();
+      const { data, error } = await supabase.rpc("obter_dados_eleicao_urna", {
+        p_eleicao_id: eleicaoId,
+      });
 
       if (!ativo) return false;
-      if (erroEleicao || !eleicao) {
-        setErro("NÃ£o foi possÃ­vel carregar a eleiÃ§Ã£o. Verifique as permissÃµes de leitura.");
+
+      const dados = data as {
+        eleicao?: { nome: string };
+        candidatos?: Candidato[];
+      } | null;
+
+      if (error || !dados?.eleicao) {
+        console.error("Falha ao carregar dados da eleição da urna:", {
+          code: error?.code,
+          message: error?.message,
+          eleicaoId,
+        });
+        setErro(
+          error
+            ? `Não foi possível carregar os dados da eleição (${error.code}).`
+            : "A eleição liberada não foi encontrada. Gere uma nova liberação."
+        );
         setCarregando(false);
         return false;
       }
 
-      const { data: lista, error: erroCandidatos } = await supabase
-        .from("candidatos")
-        .select("id, numero, foto_url, funcionario_id")
-        .eq("eleicao_id", eleicaoId)
-        .order("numero");
-
-      if (!ativo) return false;
-      if (erroCandidatos || !lista) {
-        setErro("NÃ£o foi possÃ­vel carregar os candidatos. Verifique as polÃ­ticas de leitura.");
-        setCarregando(false);
-        return false;
-      }
-
-      const candidatosDaEleicao = lista as {
-        id: string;
-        numero: number;
-        foto_url: string | null;
-        funcionario_id: string;
-      }[];
-      const ids = candidatosDaEleicao.map((item) => item.funcionario_id);
-      const { data: funcionarios, error: erroFuncionarios } = ids.length
-        ? await supabase
-            .from("funcionarios")
-            .select("id, nome, setor")
-            .in("id", ids)
-        : { data: [], error: null };
-
-      if (!ativo) return false;
-      if (erroFuncionarios || !funcionarios) {
-        setErro("NÃ£o foi possÃ­vel carregar os dados dos candidatos. Verifique as polÃ­ticas de leitura.");
-        setCarregando(false);
-        return false;
-      }
-
-      const funcionariosDaEleicao = funcionarios as {
-        id: string;
-        nome: string;
-        setor: string | null;
-      }[];
-
-      setEleicaoNome(eleicao.nome);
-      setCandidatos(
-        candidatosDaEleicao.map((item) => {
-          const funcionario = funcionariosDaEleicao.find(
-            (f) => f.id === item.funcionario_id
-          );
-          return {
-            id: item.id,
-            numero: item.numero,
-            foto_url: item.foto_url,
-            nome: funcionario?.nome ?? "Candidato",
-            setor: funcionario?.setor ?? null,
-          };
-        })
-      );
+      setEleicaoNome(dados.eleicao.nome);
+      setCandidatos(dados.candidatos ?? []);
       return true;
     }
 
