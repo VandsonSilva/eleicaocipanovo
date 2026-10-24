@@ -1,8 +1,10 @@
 
-import { NextResponse } from "next/server";
+import { connection, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 
 export async function GET() {
+  await connection();
+
   const { error } = await supabase.rpc("testar_conexao_cipa");
 
   if (error) {

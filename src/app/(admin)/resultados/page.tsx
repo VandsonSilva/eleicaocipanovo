@@ -39,9 +39,6 @@ export default function ResultadosPage() {
   const supabase = createClient();
 
   const carregarEleicoes = useCallback(async () => {
-    setCarregando(true);
-    setErro("");
-
     const { data, error } = await supabase
       .from("eleicoes")
       .select("id, nome, data_inicio, data_fim, status")
@@ -67,12 +64,7 @@ export default function ResultadosPage() {
   }, [supabase]);
 
   const carregarResultado = useCallback(async () => {
-    setResultado(null);
-    setErro("");
-
     if (!eleicaoId) return;
-
-    setCarregando(true);
 
     const { data, error } = await supabase.rpc("resultados_cipa", {
       p_eleicao_id: eleicaoId,
@@ -89,14 +81,16 @@ export default function ResultadosPage() {
   }, [eleicaoId, supabase]);
 
   useEffect(() => {
+    // The Supabase request resolves before carregarEleicoes updates component state.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void carregarEleicoes();
   }, [carregarEleicoes]);
 
   useEffect(() => {
     if (eleicaoId) {
+      // The Supabase request resolves before carregarResultado updates component state.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       void carregarResultado();
-    } else {
-      setResultado(null);
     }
   }, [eleicaoId, carregarResultado]);
 
@@ -140,7 +134,12 @@ export default function ResultadosPage() {
           <select
             id="eleicao"
             value={eleicaoId}
-            onChange={(e) => setEleicaoId(e.target.value)}
+            onChange={(e) => {
+              setEleicaoId(e.target.value);
+              setResultado(null);
+              setErro("");
+              setCarregando(Boolean(e.target.value));
+            }}
             className="w-full rounded-lg border border-slate-300 bg-white p-3 text-slate-800 md:max-w-lg"
           >
             <option value="">Selecione uma eleição</option>
@@ -312,7 +311,10 @@ export default function ResultadosPage() {
         <div className="mt-5">
           <button
             type="button"
-            onClick={() => void carregarResultado()}
+            onClick={() => {
+              setCarregando(true);
+              void carregarResultado();
+            }}
             disabled={!eleicaoId || carregando}
             className="rounded-lg bg-green-800 px-5 py-3 font-bold text-white transition hover:bg-green-900 disabled:cursor-not-allowed disabled:opacity-50"
           >

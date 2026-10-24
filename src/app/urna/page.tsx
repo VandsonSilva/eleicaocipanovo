@@ -73,7 +73,6 @@ export default function UrnaPage() {
 
   useEffect(() => {
     if (!autenticado) {
-      setCarregando(false);
       return;
     }
 
@@ -108,7 +107,13 @@ export default function UrnaPage() {
         return false;
       }
 
-      const ids = lista.map((item) => item.funcionario_id);
+      const candidatosDaEleicao = lista as {
+        id: string;
+        numero: number;
+        foto_url: string | null;
+        funcionario_id: string;
+      }[];
+      const ids = candidatosDaEleicao.map((item) => item.funcionario_id);
       const { data: funcionarios, error: erroFuncionarios } = ids.length
         ? await supabase
             .from("funcionarios")
@@ -123,10 +128,18 @@ export default function UrnaPage() {
         return false;
       }
 
+      const funcionariosDaEleicao = funcionarios as {
+        id: string;
+        nome: string;
+        setor: string | null;
+      }[];
+
       setEleicaoNome(eleicao.nome);
       setCandidatos(
-        lista.map((item) => {
-          const funcionario = funcionarios.find((f) => f.id === item.funcionario_id);
+        candidatosDaEleicao.map((item) => {
+          const funcionario = funcionariosDaEleicao.find(
+            (f) => f.id === item.funcionario_id
+          );
           return {
             id: item.id,
             numero: item.numero,
@@ -199,7 +212,6 @@ export default function UrnaPage() {
       }
     }
 
-    setCarregando(false);
     void verificarLiberacao();
     const intervalo = window.setInterval(() => void verificarLiberacao(), 2500);
 

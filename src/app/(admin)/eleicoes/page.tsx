@@ -41,14 +41,6 @@ function paraDataBanco(data: string) {
   return new Date(data).toISOString();
 }
 
-function paraDataLocal(data: string) {
-  const dataConvertida = new Date(data);
-  const fuso = dataConvertida.getTimezoneOffset() * 60000;
-  return new Date(dataConvertida.getTime() - fuso)
-    .toISOString()
-    .slice(0, 16);
-}
-
 export default function EleicoesPage() {
   const [eleicoes, setEleicoes] = useState<Eleicao[]>([]);
   const [nome, setNome] = useState("Eleição CIPA");
@@ -62,8 +54,6 @@ export default function EleicoesPage() {
   const [excluindoId, setExcluindoId] = useState<string | null>(null);
 
   const carregarEleicoes = useCallback(async () => {
-    setCarregando(true);
-
     try {
       const supabase = createClient();
 
@@ -85,6 +75,8 @@ export default function EleicoesPage() {
   }, []);
 
   useEffect(() => {
+    // The Supabase request resolves before carregarEleicoes updates component state.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void carregarEleicoes();
   }, [carregarEleicoes]);
 

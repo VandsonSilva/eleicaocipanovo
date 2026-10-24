@@ -60,8 +60,6 @@ export default function CandidatosPage() {
   };
 
   const carregarDados = useCallback(async () => {
-    setCarregando(true);
-
     try {
       const supabase = createClient();
 
@@ -128,6 +126,8 @@ export default function CandidatosPage() {
   }, []);
 
   useEffect(() => {
+    // The Supabase request resolves before carregarDados updates component state.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void carregarDados();
   }, [carregarDados]);
 

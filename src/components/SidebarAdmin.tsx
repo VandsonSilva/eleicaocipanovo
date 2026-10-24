@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 const links = [
   { href: "/dashboard", titulo: "Visão geral", icone: "▦" },
@@ -15,17 +15,15 @@ const links = [
 
 export default function SidebarAdmin() {
   const pathname = usePathname();
+  const router = useRouter();
 
   async function sair() {
-    const resposta = await fetch("/api/logout", {
+    await fetch("/api/logout", {
       method: "POST",
     });
 
-    if (resposta.redirected) {
-      window.location.href = resposta.url;
-    } else {
-      window.location.href = "/";
-    }
+    router.replace("/");
+    router.refresh();
   }
 
   return (

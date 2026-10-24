@@ -30,6 +30,15 @@ export default function LoginPage() {
         return;
       }
 
+      const { data: administrador, error: erroPermissao } =
+        await supabase.rpc("is_cipa_admin");
+
+      if (erroPermissao || administrador !== true) {
+        await supabase.auth.signOut();
+        setErro("Esta conta não está autorizada para acessar o painel administrativo.");
+        return;
+      }
+
       router.replace("/dashboard");
       router.refresh();
     } catch (error) {

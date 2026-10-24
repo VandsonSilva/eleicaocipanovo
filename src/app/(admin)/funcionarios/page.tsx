@@ -25,8 +25,6 @@ export default function FuncionariosPage() {
   const [acaoId, setAcaoId] = useState<string | null>(null);
 
   async function carregarFuncionarios() {
-    setCarregando(true);
-
     try {
       const supabase = createClient();
 
@@ -48,6 +46,8 @@ export default function FuncionariosPage() {
   }
 
   useEffect(() => {
+    // The Supabase request resolves before carregarFuncionarios updates component state.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void carregarFuncionarios();
   }, []);
 
