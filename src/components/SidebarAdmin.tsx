@@ -10,7 +10,7 @@ const links = [
   { href: "/eleicoes", titulo: "Eleições", icone: "▤" },
   { href: "/candidatos", titulo: "Candidatos", icone: "✓" },
   { href: "/resultados", titulo: "Resultados", icone: "▥" },
-  { href: "/liberacao", titulo: "Liberacao", icone: "▥" },
+  { href: "/liberacao", titulo: "Liberação", icone: "▥" },
 ];
 
 export default function SidebarAdmin() {

@@ -33,7 +33,7 @@ export default function UrnaPage() {
 
   const tokenAtivoRef = useRef(false);
 
-  // Restaura a sessÃ£o salva e valida se a conta continua autorizada como urna.
+  // Restaura a sessão salva e valida se a conta continua autorizada como urna.
   useEffect(() => {
     let ativo = true;
 
@@ -56,7 +56,7 @@ export default function UrnaPage() {
         await supabase.auth.signOut();
         setAutenticado(false);
         setCarregando(false);
-        setErroLogin("Esta conta nÃ£o estÃ¡ autorizada como urna ativa. Entre com a conta correta.");
+        setErroLogin("Esta conta não está autorizada como urna ativa. Entre com a conta correta.");
         return;
       }
 
@@ -122,7 +122,7 @@ export default function UrnaPage() {
         if (!ativo) return;
 
         if (erroLiberacao) {
-          setErro("NÃ£o foi possÃ­vel consultar a liberaÃ§Ã£o da urna. Confirme se o tablet estÃ¡ autenticado com a conta da urna.");
+          setErro("Não foi possível consultar a liberação da urna. Confirme se o tablet está autenticado com a conta da urna.");
           setCarregando(false);
           return;
         }
@@ -164,7 +164,7 @@ export default function UrnaPage() {
         setCarregando(false);
       } catch {
         if (ativo) {
-          setErro("Falha de comunicaÃ§Ã£o com o Supabase. Verifique a conexÃ£o.");
+          setErro("Falha de comunicação com o Supabase. Verifique a conexão.");
           setCarregando(false);
         }
       } finally {
@@ -184,7 +184,7 @@ export default function UrnaPage() {
   async function entrarNaUrna(event: React.FormEvent<HTMLFormElement>) {
    
   event.preventDefault();
-  console.log("1. Clique no botÃ£o de login");
+  console.log("1. Clique no botão de login");
 
   if (entrando) return;
 
@@ -194,14 +194,14 @@ export default function UrnaPage() {
   try {
     const supabase = createUrnaClient();
 
-    console.log("2. Chamando autenticaÃ§Ã£o");
+    console.log("2. Chamando autenticação");
 
     const { data, error: erroAuth } = await supabase.auth.signInWithPassword({
       email: email.trim(),
       password: senha,
     });
 
-    console.log("3. Resultado autenticaÃ§Ã£o:", {
+    console.log("3. Resultado autenticação:", {
       usuario: data.user?.id,
       erro: erroAuth?.message,
     });
@@ -210,24 +210,24 @@ export default function UrnaPage() {
       setErroLogin(
         erroAuth?.message
           ? `Falha no login: ${erroAuth.message}`
-          : "NÃ£o foi possÃ­vel autenticar. Confira o e-mail e a senha."
+          : "Não foi possível autenticar. Confira o e-mail e a senha."
       );
       return;
     }
 
-    console.log("4. Validando autorizaÃ§Ã£o da urna");
+    console.log("4. Validando autorização da urna");
 
     const { data: autorizado, error: erroPermissao } =
       await supabase.rpc("is_cipa_urna");
 
-    console.log("5. Resultado autorizaÃ§Ã£o:", {
+    console.log("5. Resultado autorização:", {
       autorizado,
       erro: erroPermissao?.message,
     });
 
     if (erroPermissao) {
       setErroLogin(
-        `Login realizado, mas nÃ£o foi possÃ­vel validar a urna: ${erroPermissao.message}`
+        `Login realizado, mas não foi possível validar a urna: ${erroPermissao.message}`
       );
       await supabase.auth.signOut();
       return;
@@ -236,12 +236,12 @@ export default function UrnaPage() {
     if (autorizado !== true) {
       await supabase.auth.signOut();
       setErroLogin(
-        "Login realizado, mas esta conta nÃ£o estÃ¡ autorizada como urna ativa."
+        "Login realizado, mas esta conta não está autorizada como urna ativa."
       );
       return;
     }
 
-    console.log("6. Login e autorizaÃ§Ã£o concluÃ­dos");
+    console.log("6. Login e autorização concluídos");
 
     setSenha("");
     setErro("");
@@ -279,7 +279,7 @@ export default function UrnaPage() {
     setMensagem("");
     setCandidato(null);
 
-    // SÃ³ procura o candidato depois de digitar os dois dÃ­gitos.
+    // Só procura o candidato depois de digitar os dois dígitos.
     if (novoNumero.length === 2) {
       const encontrado = candidatos.find(
         (item) => String(item.numero).padStart(2, "0") === novoNumero
@@ -288,7 +288,7 @@ export default function UrnaPage() {
       if (encontrado) {
         setCandidato(encontrado);
       } else {
-        setMensagem("NÃºmero nÃ£o encontrado. Pressione CORRIGE para tentar novamente.");
+        setMensagem("Número não encontrado. Pressione CORRIGE para tentar novamente.");
       }
     }
   }
@@ -314,7 +314,7 @@ export default function UrnaPage() {
     if (processando || finalizado) return;
 
     if (!branco && !candidato) {
-      setMensagem("Digite o nÃºmero de um candidato vÃ¡lido ou escolha BRANCO.");
+      setMensagem("Digite o número de um candidato válido ou escolha BRANCO.");
       return;
     }
 
@@ -323,7 +323,7 @@ export default function UrnaPage() {
       : `${candidato?.numero} - ${candidato?.nome}`;
 
     const autorizado = window.confirm(
-      `Confirma sua escolha: ${escolha}? ApÃ³s confirmar, nÃ£o serÃ¡ possÃ­vel alterar o voto.`
+      `Confirma sua escolha: ${escolha}? Após confirmar, não será possível alterar o voto.`
     );
 
     if (!autorizado) return;
@@ -340,7 +340,7 @@ export default function UrnaPage() {
 
     if (error || !(data as { registrado?: boolean } | null)?.registrado) {
       setMensagem(
-        "NÃ£o foi possÃ­vel registrar o voto. Procure o administrador para verificar a autorizaÃ§Ã£o."
+        "Não foi possível registrar o voto. Procure o administrador para verificar a autorização."
       );
       setProcessando(false);
       return;
@@ -415,7 +415,7 @@ export default function UrnaPage() {
   if (carregando) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-slate-200">
-        Preparando a urna eletrÃ´nica...
+        Preparando a urna eletrônica...
       </main>
     );
   }
@@ -427,10 +427,10 @@ export default function UrnaPage() {
           <div className="mx-auto mb-6 h-16 w-16 animate-pulse rounded-full bg-blue-100 ring-8 ring-blue-50" />
           <h1 className="text-3xl font-black text-slate-900">Urna da CIPA</h1>
           <p className="mt-4 text-xl font-semibold text-slate-700">
-            Aguarde liberaÃ§Ã£o para votar
+            Aguarde liberação para votar
           </p>
           <p className="mt-3 text-sm text-slate-500">
-            A votaÃ§Ã£o serÃ¡ iniciada automaticamente apÃ³s a liberaÃ§Ã£o do administrador.
+            A votação será iniciada automaticamente após a liberação do administrador.
           </p>
         </div>
       </main>
@@ -441,7 +441,7 @@ export default function UrnaPage() {
     return (
       <main className="flex min-h-screen items-center justify-center bg-slate-200 p-6">
         <div className="rounded-xl bg-white p-8 text-center shadow">
-          <h1 className="text-2xl font-bold">Urna indisponÃ­vel</h1>
+          <h1 className="text-2xl font-bold">Urna indisponível</h1>
           <p className="mt-4 text-slate-600">{erro}</p>
           <button
             onClick={() => { setErro(""); setCarregando(false); }}
@@ -464,7 +464,7 @@ export default function UrnaPage() {
             Seu voto foi registrado. Obrigado por participar!
           </p>
           <p className="mt-4 text-sm text-slate-500">
-            Aguarde o retorno Ã  tela de liberaÃ§Ã£o.
+            Aguarde o retorno à tela de liberação.
           </p>
         </div>
       </main>
@@ -477,12 +477,12 @@ export default function UrnaPage() {
         <header className="flex items-center justify-between bg-slate-800 px-5 py-4 text-white">
           <div>
             <p className="text-xs uppercase tracking-widest text-slate-300">
-              Sistema de votaÃ§Ã£o
+              Sistema de votação
             </p>
-            <h1 className="text-xl font-bold">ELEIÃ‡ÃƒO DA CIPA</h1>
+            <h1 className="text-xl font-bold">ELEIÇÃO DA CIPA</h1>
           </div>
           <div className="text-right">
-            <p className="text-xs text-slate-300">EleiÃ§Ã£o</p>
+            <p className="text-xs text-slate-300">Eleição</p>
             <p className="max-w-48 font-semibold">{eleicaoNome}</p>
           </div>
         </header>
@@ -500,7 +500,7 @@ export default function UrnaPage() {
 
             <div className="mt-6">
               <p className="text-sm font-semibold text-slate-600">
-                Digite o nÃºmero do candidato
+                Digite o número do candidato
               </p>
 
               <div className="mt-3 flex min-h-20 items-center gap-2">
@@ -514,7 +514,7 @@ export default function UrnaPage() {
                 ))}
                 {!numero && (
                   <span className="ml-2 text-sm text-slate-500">
-                    Aguardando nÃºmero...
+                    Aguardando número...
                   </span>
                 )}
               </div>
@@ -538,7 +538,7 @@ export default function UrnaPage() {
                       />
                     ) : (
                       <span className="p-2 text-center text-sm text-slate-500">
-                        Foto nÃ£o cadastrada
+                        Foto não cadastrada
                       </span>
                     )}
                   </div>
@@ -550,7 +550,7 @@ export default function UrnaPage() {
                       {candidato.nome}
                     </h3>
                     <p className="mt-3 text-slate-700">
-                      NÃºmero: <strong>{candidato.numero}</strong>
+                      Número: <strong>{candidato.numero}</strong>
                     </p>
                     {candidato.setor && (
                       <p className="mt-1 text-sm text-slate-600">
@@ -562,32 +562,32 @@ export default function UrnaPage() {
               ) : numero ? (
                 <div className="flex min-h-44 items-center justify-center text-center">
                   <p className="font-semibold text-red-700">
-                    NÃºmero nÃ£o encontrado. Use CORRIGE para tentar novamente.
+                    Número não encontrado. Use CORRIGE para tentar novamente.
                   </p>
                 </div>
               ) : (
                 <div className="flex min-h-44 items-center justify-center text-slate-400">
-                  A foto do candidato aparecerÃ¡ aqui
+                  A foto do candidato aparecerá aqui
                 </div>
               )}
             </div>
 
             <div className="mt-5 rounded-lg bg-slate-200 p-4 text-sm text-slate-700">
               {branco
-                ? "VocÃª selecionou voto em branco."
+                ? "Você selecionou voto em branco."
                 : candidato
                   ? "Confira a foto e os dados. Se estiver correto, pressione CONFIRMA."
-                  : "Digite os dois nÃºmeros do candidato. Para votar em branco, pressione BRANCO."}
+                  : "Digite os dois números do candidato. Para votar em branco, pressione BRANCO."}
             </div>
           </section>
 
           <section className="bg-slate-800 p-5 text-white md:p-7">
             <div className="mb-5 text-center">
               <p className="text-xs uppercase tracking-widest text-slate-300">
-                Teclado numÃ©rico
+                Teclado numérico
               </p>
               <p className="mt-1 text-sm text-slate-300">
-                Digite o nÃºmero do candidato
+                Digite o número do candidato
               </p>
             </div>
 
@@ -648,7 +648,7 @@ export default function UrnaPage() {
         </div>
 
         <footer className="bg-slate-200 px-5 py-3 text-center text-xs text-slate-600">
-          Confira sua escolha antes de confirmar. O voto nÃ£o poderÃ¡ ser alterado apÃ³s o registro.
+          Confira sua escolha antes de confirmar. O voto não poderá ser alterado após o registro.
         </footer>
       </div>
     </main>
